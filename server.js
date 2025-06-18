@@ -1,53 +1,68 @@
 const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const path = require('path');
 const app = express();
 const csv = require('csvtojson');
-const cors = require('cors');
 const fs = require('fs');
-const mongoose = require('mongoose');
-const College = require('./college');
 const bodyParser = require('body-parser');
-const path = require('path');
+const College = require('./college');
 require('dotenv').config();
 
-app.use(cors());
+// CORS configuration
+app.use(cors({
+    origin: ['http://localhost:5501', 'http://127.0.0.1:5501', 'http://localhost:3800'],
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
+
+// Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://myAtlasDBUser:gJjlIxGqpR26avE5@cluster0.7i2ldxy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 const PORT = process.env.PORT || 3800;
 
-mongoose.connect(MONGODB_URI)
-    .then(() => {
-        console.log('Database has been connected');
-    })
-    .catch(err => {
-        console.error('Database connection error:', err);
-    });
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'signin.html'));
+// MongoDB connection
+mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('Connected to MongoDB');
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
 });
 
-app.get('/csvData', (req, res) => {
+// Routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/signin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'signin.html'));
+});
+
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
+app.get('/filter', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'filter.html'));
+});
+
+app.get('/csvData', async (req, res) => {
     console.log('Received request for /csvData');
-    const csvFilePath = path.join(__dirname, process.env.CSV_FILE_PATH || 'engineering colleges in India.csv');
-    csv()
-        .fromFile(csvFilePath)
-        .then((jsonObj) => {
-            College.insertMany(jsonObj)
-                .then(() => {
-                    console.log('Data inserted successfully');
-                    res.status(200).json(jsonObj);
-                })
-                .catch(err => {
-                    console.error('Error inserting data:', err);
-                    res.status(500).send('Error inserting data');
-                });
-        })
-        .catch(err => {
-            console.error('Error reading CSV file:', err);
-            res.status(500).send('Error reading CSV file');
-        });
+    try {
+        const csvFilePath = path.join(__dirname, 'engineering colleges in India.csv');
+        const jsonArray = await csv().fromFile(csvFilePath);
+        await College.insertMany(jsonArray, { ordered: false });
+        console.log('Data inserted successfully');
+        res.status(200).json(jsonArray);
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).send('Error processing data');
+    }
 });
 
 app.get('/colleges', async (req, res) => {
@@ -122,5 +137,18 @@ app.post('/signin', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
+// Handle 404
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 

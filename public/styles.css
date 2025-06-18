@@ -729,43 +729,54 @@ main {
 }
 
 .featured-colleges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    flex-direction: column;
-    color: white;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 1200px;
 }
 
 .college-card {
     font-family: "Poppins", sans-serif;
     color: black;
-    /* background-color: #484747; */
-    border-radius: 8px;
-    padding: 16px;
-    margin: 16px 0;
-    box-shadow: 0px 5px 80px #110d02;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 0;
+    box-shadow: 0px 5px 20px rgba(17, 13, 2, 0.2);
     animation: fadeInUp 1.5s ease-in-out;
-}
-.college-card p{
-    font-family: "Poppins", sans-serif;
-}
-.college-card h3 {
-    font-family: "Poppins", sans-serif;
-    margin-top: 0;
-}
-
-.college-card h3 {
-    margin-top: 0;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: transform 0.6s ease, box-shadow 0.6s ease;
 }
 
 .college-card img {
     width: 100%;
-    height: auto;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.college-card h3 {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.college-card p {
+    font-family: "Poppins", sans-serif;
+    margin: 5px 0;
+    color: #666;
+    line-height: 1.5;
 }
 
 .college-card:hover {
-    box-shadow: 0px 5px 80px #afadad;
-    transition: .6s;
+    box-shadow: 0px 8px 30px rgba(175, 173, 173, 0.3);
+    transform: translateY(-5px);
 }
 
 .details-btn {
@@ -1091,7 +1102,7 @@ footer {
     60%,
     80%,
     100% {
-        transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+        transition-timing-function: cubic-bezier(0.215, 0.610, 0.27, 1.000);
     }
 
     0% {
