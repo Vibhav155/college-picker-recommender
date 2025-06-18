@@ -16,7 +16,6 @@ app.use(cors({
         'http://localhost:5501',
         'http://127.0.0.1:5501',
         'http://localhost:3800'
-        'https://college-picker.onrender.com'
     ],
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true
