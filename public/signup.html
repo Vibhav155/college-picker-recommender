@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to bottom right, #4a90e2, #9013fe);
+    color: #ffffff;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+a {
+    color: #ffdd59;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Container */
+.auth-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 2rem;
+    width: 350px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Form Styles */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+input {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    outline: none;
+    transition: 0.3s ease;
+}
+
+input:focus {
+    box-shadow: 0 0 5px #ffdd59, 0 0 10px #ffdd59;
+}
+
+button {
+    background: linear-gradient(to right, #ff512f, #f09819);
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 5px 15px rgba(255, 81, 47, 0.5);
+}
+
+/* Footer Links */
+p {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 400px) {
+    .auth-container {
+        width: 90%;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Sign Up</h2>
+        <form id="signupForm">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="signin.html">Sign In</a></p>
+    </div>
+    <script src="auth.js"></script>
+</body>
+</html>
