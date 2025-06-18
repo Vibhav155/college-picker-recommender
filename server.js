@@ -9,12 +9,20 @@ const bodyParser = require('body-parser');
 const College = require('./college');
 require('dotenv').config();
 
-// CORS configuration
+// ✅ Updated CORS configuration to allow localhost:3000
 app.use(cors({
-    origin: ['http://localhost:5501', 'http://127.0.0.1:5501', 'http://localhost:3800'],
-    methods: ['GET', 'POST'],
+    origin: [
+        'http://localhost:3000', // <-- added this
+        'http://localhost:5501',
+        'http://127.0.0.1:5501',
+        'http://localhost:3800'
+    ],
+    methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true
 }));
+
+// ✅ Handle preflight (OPTIONS) requests
+app.options('*', cors());
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
@@ -29,9 +37,9 @@ mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
-    console.log('Connected to MongoDB');
+    console.log('✅ Connected to MongoDB');
 }).catch(err => {
-    console.error('MongoDB connection error:', err);
+    console.error('❌ MongoDB connection error:', err);
 });
 
 // Routes
@@ -52,21 +60,21 @@ app.get('/filter', (req, res) => {
 });
 
 app.get('/csvData', async (req, res) => {
-    console.log('Received request for /csvData');
+    console.log('📥 Received request for /csvData');
     try {
         const csvFilePath = path.join(__dirname, 'engineering colleges in India.csv');
         const jsonArray = await csv().fromFile(csvFilePath);
         await College.insertMany(jsonArray, { ordered: false });
-        console.log('Data inserted successfully');
+        console.log('✅ CSV Data inserted successfully');
         res.status(200).json(jsonArray);
     } catch (err) {
-        console.error('Error:', err);
+        console.error('❌ Error processing CSV:', err);
         res.status(500).send('Error processing data');
     }
 });
 
 app.get('/colleges', async (req, res) => {
-    console.log('Received request for /colleges');
+    console.log('📥 Received request for /colleges');
     try {
         const colleges = await College.find({}, {
             'College Name': 1,
@@ -84,10 +92,10 @@ app.get('/colleges', async (req, res) => {
             'College Type': 1,
             'Average Fees': 1,
         });
-        console.log('Colleges data:', colleges);
+        console.log('✅ Colleges data fetched:', colleges.length);
         res.status(200).json(colleges);
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('❌ Error fetching colleges:', error);
         res.status(500).send('Error fetching data');
     }
 });
@@ -115,7 +123,7 @@ app.post('/signup', async (req, res) => {
         
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
-        console.error('Signup error:', error);
+        console.error('❌ Signup error:', error);
         res.status(500).json({ message: 'Error during signup' });
     }
 });
@@ -132,14 +140,14 @@ app.post('/signin', async (req, res) => {
         
         res.status(200).json({ message: 'Sign in successful' });
     } catch (error) {
-        console.error('Signin error:', error);
+        console.error('❌ Signin error:', error);
         res.status(500).json({ message: 'Error during signin' });
     }
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('❌ Server error:', err.stack);
     res.status(500).send('Something broke!');
 });
 
@@ -148,7 +156,7 @@ app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Start the server
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`🚀 Server is running on port ${PORT}`);
 });
-

@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const hiddenElements = document.querySelectorAll('.hidden');
     hiddenElements.forEach(element => observer.observe(element));
 
-    // Add click event listeners for details buttons
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('details-btn')) {
             const details = e.target.nextElementSibling;
@@ -50,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add event listeners only if elements exist
     const searchInput = document.getElementById('searchInput');
     const stateFilter = document.getElementById('stateFilter');
     const typeFilter = document.getElementById('typeFilter');
@@ -65,33 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (searchInput) {
-        searchInput.addEventListener('input', filterColleges);
-    }
+    if (searchInput) searchInput.addEventListener('input', filterColleges);
+    if (stateFilter) stateFilter.addEventListener('change', filterColleges);
+    if (typeFilter) typeFilter.addEventListener('change', filterColleges);
+    if (feeRange) feeRange.addEventListener('input', filterColleges);
+    if (ratingFilter) ratingFilter.addEventListener('change', filterColleges);
+    if (loadMoreButton) loadMoreButton.addEventListener('click', displayColleges);
 
-    if (stateFilter) {
-        stateFilter.addEventListener('change', filterColleges);
-    }
-
-    if (typeFilter) {
-        typeFilter.addEventListener('change', filterColleges);
-    }
-
-    if (feeRange) {
-        feeRange.addEventListener('input', filterColleges);
-    }
-
-    if (ratingFilter) {
-        ratingFilter.addEventListener('change', filterColleges);
-    }
-
-    if (loadMoreButton) {
-        loadMoreButton.addEventListener('click', () => {
-            displayColleges();
-        });
-    }
-
-    // Only fetch colleges if we're on the filter page
     if (window.location.pathname.includes('filter.html')) {
         fetchColleges();
     }
@@ -104,11 +82,8 @@ const increment = 12;
 
 async function fetchColleges() {
     try {
-        console.log('Fetching colleges');
         const loadingSpinner = document.getElementById('loadingSpinner');
-        if (loadingSpinner) {
-            loadingSpinner.style.display = 'block';
-        }
+        if (loadingSpinner) loadingSpinner.style.display = 'block';
 
         const response = await fetch('http://localhost:3800/colleges', {
             method: 'GET',
@@ -119,38 +94,23 @@ async function fetchColleges() {
             }
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        console.log('Colleges data:', data);
-        
-        if (!Array.isArray(data)) {
-            throw new Error('Invalid data format received from server');
-        }
 
-        if (loadingSpinner) {
-            loadingSpinner.style.display = 'none';
-        }
+        if (!Array.isArray(data)) throw new Error('Invalid data format received from server');
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
 
-        // Remove duplicates based on College Name
-        const uniqueColleges = Array.from(new Map(
-            data.map(college => [college['College Name'], college])
-        ).values());
+        const uniqueColleges = Array.from(new Map(data.map(c => [c['College Name'], c])).values());
 
-        console.log('Total colleges before removing duplicates:', data.length);
-        console.log('Total colleges after removing duplicates:', uniqueColleges.length);
-
-        allColleges = uniqueColleges;  // Store the original unique data
-        filteredColleges = uniqueColleges;  // Initial filtered data is same as all data
+        allColleges = uniqueColleges;
+        filteredColleges = uniqueColleges;
         displayedCount = 0;
         displayColleges();
     } catch (error) {
         console.error('Error fetching colleges:', error);
-        if (loadingSpinner) {
-            loadingSpinner.style.display = 'none';
-        }
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+
         const collegeList = document.getElementById('collegeList');
         if (collegeList) {
             collegeList.innerHTML = `<div class="error-message">Error loading colleges. Please try again later.</div>`;
@@ -159,30 +119,17 @@ async function fetchColleges() {
 }
 
 function displayColleges() {
-    console.log('Displaying colleges:', filteredColleges);
     const collegeList = document.getElementById('collegeList');
     const loadMoreButton = document.getElementById('loadMoreButton');
 
-    if (!collegeList) {
-        console.error('College list element not found');
-        return;
-    }
-
-    // Always clear the list when displaying colleges
-    collegeList.innerHTML = '';
-    displayedCount = 0;
+    if (!collegeList) return;
 
     const collegesToDisplay = filteredColleges.slice(displayedCount, displayedCount + increment);
+
     collegesToDisplay.forEach(college => {
         const collegeCard = document.createElement('div');
         collegeCard.classList.add('college-card', 'hidden');
 
-        collegeCard.dataset.location = college['City'] || '';
-        collegeCard.dataset.rating = college['Rating'] || '';
-        collegeCard.dataset.type = college['College Type'] || '';
-        collegeCard.dataset.fee = college['Average Fees'] || '0';
-
-        // Format the rating
         const ratingValue = parseFloat(college['Rating']) || 0;
         const formattedFees = parseInt(college['Average Fees'] || 0).toLocaleString('en-IN');
 
@@ -205,29 +152,19 @@ function displayColleges() {
                 <p><strong>Total Faculty:</strong> ${college['Total Faculty']}</p>
                 <p><strong>Established:</strong> ${college['Established Year']}</p>
                 <p><strong>University:</strong> ${college['University']}</p>
-                
                 <div class="courses-section">
                     <h4>Courses Offered</h4>
                     <ul>
                         ${Array.isArray(college['Courses']) 
-                            ? college['Courses']
-                                .join(', ')
-                                .split(',')
-                                .map(course => `<li>${course.trim()}</li>`)
-                                .join('')
+                            ? college['Courses'].join(', ').split(',').map(c => `<li>${c.trim()}</li>`).join('')
                             : '<li>No courses listed</li>'}
                     </ul>
                 </div>
-                
                 <div class="facilities-section">
                     <h4>Facilities</h4>
                     <ul>
                         ${Array.isArray(college['Facilities']) 
-                            ? college['Facilities']
-                                .join(', ')
-                                .split(',')
-                                .map(facility => `<li>${facility.trim()}</li>`)
-                                .join('')
+                            ? college['Facilities'].join(', ').split(',').map(f => `<li>${f.trim()}</li>`).join('')
                             : '<li>No facilities listed</li>'}
                     </ul>
                 </div>
@@ -235,29 +172,18 @@ function displayColleges() {
         `;
 
         collegeList.appendChild(collegeCard);
-        
-        // Add animation class after a small delay
-        setTimeout(() => {
-            collegeCard.classList.add('show');
-        }, 50);
+        setTimeout(() => collegeCard.classList.add('show'), 50);
 
-        // Add click handler for details button
         const detailsBtn = collegeCard.querySelector('.details-btn');
         const detailsDiv = collegeCard.querySelector('.details');
-        
+
         detailsBtn.addEventListener('click', () => {
             const isHidden = detailsDiv.style.display === 'none';
             detailsDiv.style.display = isHidden ? 'block' : 'none';
             detailsBtn.textContent = isHidden ? 'Hide Details' : 'View Details';
-            
-            if (isHidden) {
-                detailsDiv.style.opacity = '0';
-                detailsDiv.style.display = 'block';
-                setTimeout(() => {
-                    detailsDiv.style.opacity = '1';
-                }, 10);
-            } else {
-                detailsDiv.style.opacity = '0';
+            detailsDiv.style.opacity = isHidden ? '1' : '0';
+
+            if (!isHidden) {
                 setTimeout(() => {
                     detailsDiv.style.display = 'none';
                 }, 200);
@@ -272,11 +198,6 @@ function displayColleges() {
     }
 }
 
-// Function to load more colleges
-function loadMore() {
-    displayColleges();
-}
-
 function filterColleges() {
     const searchInput = document.getElementById('searchInput');
     const stateFilter = document.getElementById('stateFilter');
@@ -284,20 +205,11 @@ function filterColleges() {
     const feeRange = document.getElementById('feeRange');
     const ratingFilter = document.getElementById('ratingFilter');
 
-    // Get values safely
     const searchValue = searchInput ? searchInput.value.toLowerCase() : '';
     const stateValue = stateFilter ? stateFilter.value.toLowerCase() : '';
     const typeValue = typeFilter ? typeFilter.value.toLowerCase() : '';
-    const feeValue = feeRange ? feeRange.value : '1000000';  // Default high value
+    const feeValue = feeRange ? feeRange.value : '1000000';
     const ratingValue = ratingFilter ? ratingFilter.value : '';
-
-    console.log('Filtering with:', {
-        search: searchValue,
-        state: stateValue,
-        type: typeValue,
-        fee: feeValue,
-        rating: ratingValue
-    });
 
     filteredColleges = allColleges.filter(college => {
         const collegeName = (college['College Name'] || '').toLowerCase();
@@ -315,23 +227,8 @@ function filterColleges() {
         return matchesSearch && matchesState && matchesType && matchesFee && matchesRating;
     });
 
+    const collegeList = document.getElementById('collegeList');
+    if (collegeList) collegeList.innerHTML = ''; // Clear old list
     displayedCount = 0;
     displayColleges();
-}
-
-// Add event listeners only if we're on the filter page
-if (window.location.pathname.includes('filter.html')) {
-    const searchInput = document.getElementById('searchInput');
-    const stateFilter = document.getElementById('stateFilter');
-    const typeFilter = document.getElementById('typeFilter');
-    const feeRange = document.getElementById('feeRange');
-    const ratingFilter = document.getElementById('ratingFilter');
-    const loadMoreButton = document.getElementById('loadMoreButton');
-
-    if (searchInput) searchInput.addEventListener('input', filterColleges);
-    if (stateFilter) stateFilter.addEventListener('change', filterColleges);
-    if (typeFilter) typeFilter.addEventListener('change', filterColleges);
-    if (feeRange) feeRange.addEventListener('input', filterColleges);
-    if (ratingFilter) ratingFilter.addEventListener('change', filterColleges);
-    if (loadMoreButton) loadMoreButton.addEventListener('click', displayColleges);
 }
