@@ -85,7 +85,7 @@ async function fetchColleges() {
         const loadingSpinner = document.getElementById('loadingSpinner');
         if (loadingSpinner) loadingSpinner.style.display = 'block';
 
-        const response = await fetch('http://localhost:3800/colleges', {
+        const response = await fetch('https://college-picker.onrender.com/colleges', {
             method: 'GET',
             credentials: 'include',
             headers: {
